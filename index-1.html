@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090b18" />
+  <title>KarakterVerse — Ensiklopedia Karakter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090b18;
+      --panel: #11152a;
+      --panel-2: #171c35;
+      --text: #f3f4ff;
+      --muted: #a4aac8;
+      --purple: #9b5cff;
+      --blue: #38bdf8;
+      --line: rgba(166, 145, 255, .18);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Poppins", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(119, 61, 255, .17), transparent 28rem),
+        radial-gradient(circle at 90% 25%, rgba(0, 174, 255, .12), transparent 27rem),
+        var(--bg);
+    }
+    button { font: inherit; }
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 20px clamp(18px, 6vw, 84px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(9, 11, 24, .76); backdrop-filter: blur(14px);
+      position: sticky; top: 0; z-index: 5;
+    }
+    .brand { font-size: 1.25rem; font-weight: 800; letter-spacing: -.5px; }
+    .brand span { color: var(--blue); }
+    .nav-tag { color: var(--muted); font-size: .82rem; }
+    .hero { text-align: center; padding: 76px 20px 42px; }
+    .eyebrow {
+      display: inline-block; padding: 7px 14px; border: 1px solid var(--line);
+      border-radius: 999px; color: #c9b5ff; background: rgba(155, 92, 255, .09);
+      font-size: .75rem; letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    h1 {
+      margin: 18px 0 12px; font-size: clamp(2.3rem, 6vw, 4.5rem);
+      line-height: 1.12; letter-spacing: -2px;
+    }
+    h1 .gradient {
+      background: linear-gradient(90deg, #bd8cff, #54d4ff);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero p { max-width: 620px; margin: 0 auto; color: var(--muted); line-height: 1.8; font-size: .95rem; }
+    .toolbar {
+      width: min(1120px, calc(100% - 36px)); margin: 24px auto 28px;
+      display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .section-title { font-size: 1.1rem; font-weight: 600; }
+    .search {
+      width: min(310px, 100%); color: var(--text); background: var(--panel);
+      border: 1px solid var(--line); border-radius: 12px; padding: 12px 15px; outline: none;
+    }
+    .search:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, .1); }
+    .grid {
+      width: min(1120px, calc(100% - 36px)); margin: 0 auto 80px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); gap: 22px;
+    }
+    .character-card {
+      overflow: hidden; border-radius: 18px; background: linear-gradient(145deg, rgba(25, 30, 57, .98), rgba(14, 17, 35, .98));
+      border: 1px solid var(--line); transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+    }
+    .character-card:hover {
+      transform: translateY(-8px); border-color: rgba(92, 196, 255, .55);
+      box-shadow: 0 15px 38px rgba(75, 58, 180, .2), 0 0 22px rgba(56, 189, 248, .12);
+    }
+    .portrait { width: 100%; height: 275px; object-fit: cover; display: block; background: #202746; }
+    .card-content { padding: 17px; }
+    .card-content h2 { margin: 0 0 5px; font-size: 1.05rem; }
+    .origin { margin: 0 0 16px; color: var(--muted); font-size: .8rem; min-height: 24px; }
+    .btn {
+      width: 100%; border: 0; cursor: pointer; color: white; font-weight: 600;
+      border-radius: 10px; padding: 11px 14px;
+      background: linear-gradient(100deg, #8145e8, #237fc9);
+      transition: filter .2s, transform .2s;
+    }
+    .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .empty { grid-column: 1 / -1; text-align: center; padding: 45px 10px; color: var(--muted); }
+    footer { text-align: center; color: #747b9c; padding: 24px; border-top: 1px solid var(--line); font-size: .78rem; }
+
+    /* Lapisan popup biografi */
+    .modal {
+      position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
+      padding: 18px; background: rgba(3, 5, 14, .78); backdrop-filter: blur(9px);
+      opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease;
+    }
+    .modal.show { opacity: 1; visibility: visible; }
+    .modal-box {
+      position: relative; width: min(760px, 100%); max-height: 90vh; overflow-y: auto;
+      display: grid; grid-template-columns: minmax(190px, .8fr) 1.2fr;
+      background: #11162c; border: 1px solid rgba(166, 145, 255, .3);
+      border-radius: 20px; box-shadow: 0 20px 80px rgba(0, 0, 0, .5);
+      transform: translateY(18px) scale(.98); transition: transform .25s ease;
+    }
+    .modal.show .modal-box { transform: translateY(0) scale(1); }
+    .modal-photo { width: 100%; height: 100%; min-height: 430px; object-fit: cover; background: #202746; }
+    .modal-content { padding: 30px 27px; }
+    .modal-content h2 { margin: 5px 35px 4px 0; font-size: 1.65rem; line-height: 1.25; }
+    .modal-series { color: var(--blue); font-size: .82rem; margin: 0 0 20px; }
+    .detail { margin: 15px 0; }
+    .detail h3 { margin: 0 0 5px; color: #c5a5ff; font-size: .78rem; text-transform: uppercase; letter-spacing: 1px; }
+    .detail p { margin: 0; color: #c4c9df; font-size: .87rem; line-height: 1.7; }
+    .quote { padding: 13px 15px; border-left: 3px solid var(--blue); background: rgba(56, 189, 248, .07); border-radius: 0 10px 10px 0; font-style: italic; }
+    .close {
+      position: absolute; top: 12px; right: 12px; z-index: 2; width: 36px; height: 36px;
+      border: 1px solid var(--line); border-radius: 50%; color: white; background: rgba(7, 10, 25, .8);
+      cursor: pointer; font-size: 1.25rem;
+    }
+    @media (max-width: 620px) {
+      .hero { padding-top: 55px; }
+      .modal-box { display: block; }
+      .modal-photo { height: 245px; min-height: 0; }
+      .modal-content { padding: 22px; }
+      .modal-content h2 { font-size: 1.4rem; }
+      .nav-tag { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">Karakter<span>Verse</span> ✦</div>
+    <div class="nav-tag">Jelajahi dunia anime & donghua</div>
+  </nav>
+
+  <header class="hero">
+    <span class="eyebrow">Character encyclopedia</span>
+    <h1>Kenali Karakter <span class="gradient">Favoritmu</span></h1>
+    <p>Temukan kisah, kemampuan, dan kepribadian karakter dari berbagai dunia anime dan donghua dalam satu tempat.</p>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="section-title">✦ Daftar Karakter</div>
+      <input class="search" id="searchInput" type="search" placeholder="Cari nama atau serial..." aria-label="Cari karakter">
+    </div>
+    <section class="grid" id="characterGrid" aria-label="Daftar karakter"></section>
+  </main>
+
+  <div class="modal" id="bioModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <article class="modal-box">
+      <button class="close" id="closeModal" aria-label="Tutup popup">×</button>
+      <img class="modal-photo" id="modalPhoto" src="" alt="">
+      <div class="modal-content">
+        <span class="eyebrow">Character profile</span>
+        <h2 id="modalName"></h2>
+        <p class="modal-series" id="modalSeries"></p>
+        <div class="detail"><h3>Umur</h3><p id="modalAge"></p></div>
+        <div class="detail"><h3>Kekuatan & kemampuan</h3><p id="modalPower"></p></div>
+        <div class="detail"><h3>Biografi singkat</h3><p id="modalBio"></p></div>
+        <div class="detail"><h3>Quote / kutipan</h3><p class="quote" id="modalQuote"></p></div>
+      </div>
+    </article>
+  </div>
+
+  <footer>© 2026 KarakterVerse · Dibuat untuk para penggemar anime & donghua</footer>
+
+  <script>
+    // Data karakter disimpan di array agar mudah ditambah atau diedit.
+    const characters = [
+      {
+        name: "Naruto Uzumaki", fullName: "Naruto Uzumaki",
+        series: "Naruto", age: "17 tahun (akhir serial utama)",
+        power: "Chakra besar, Rasengan, Sage Mode, dan kekuatan Kurama.",
+        bio: "Seorang ninja dari Desa Konoha yang tumbuh dengan impian menjadi Hokage. Meski sering diremehkan, Naruto terus berusaha dan tidak meninggalkan teman-temannya.",
+        quote: "Aku akan terus maju dan membuktikan kemampuanku!",
+        image: "https://picsum.photos/seed/naruto-verse/700/900"
+      },
+      {
+        name: "Gojo Satoru", fullName: "Satoru Gojo",
+        series: "Jujutsu Kaisen", age: "28 tahun",
+        power: "Limitless, Six Eyes, Infinity, dan Domain Expansion: Unlimited Void.",
+        bio: "Penyihir jujutsu tingkat khusus sekaligus guru di Tokyo Jujutsu High. Gojo dikenal sangat percaya diri dan memiliki kekuatan luar biasa.",
+        quote: "Kekuatan besar juga membawa tanggung jawab besar.",
+        image: "https://picsum.photos/seed/gojo-verse/700/900"
+      },
+      {
+        name: "Nezuko Kamado", fullName: "Nezuko Kamado",
+        series: "Demon Slayer: Kimetsu no Yaiba", age: "12 tahun secara fisik (sekitar 14 tahun secara kronologis)",
+        power: "Regenerasi iblis, kekuatan fisik tinggi, dan Blood Demon Art: Exploding Blood.",
+        bio: "Adik Tanjiro yang berubah menjadi iblis, tetapi masih menunjukkan kasih sayang dan keinginan kuat untuk melindungi manusia.",
+        quote: "Ikatan keluarga tetap kuat dalam keadaan apa pun.",
+        image: "https://picsum.photos/seed/nezuko-verse/700/900"
+      },
+      {
+        name: "Wei Wuxian", fullName: "Wei Ying (Wei Wuxian)",
+        series: "Mo Dao Zu Shi / The Founder of Diabolism", age: "Sekitar 20-an tahun (usia bergantung alur cerita)",
+        power: "Kultivasi jalur iblis, manipulasi energi kebencian, dan penggunaan seruling Chenqing.",
+        bio: "Kultivator berbakat dari Yunmeng Jiang yang dikenal cerdas, berani, dan memiliki cara berpikir berbeda. Ia menjadi sosok penting dalam dunia kultivasi.",
+        quote: "Jalan yang berbeda tidak selalu berarti jalan yang salah.",
+        image: "https://picsum.photos/seed/wei-wuxian-verse/700/900"
+      },
+      {
+        name: "Lan Wangji", fullName: "Lan Zhan (Lan Wangji)",
+        series: "Mo Dao Zu Shi / The Founder of Diabolism", age: "Sekitar 20-an tahun (usia bergantung alur cerita)",
+        power: "Pedang Bichen, guqin Wangji, serta teknik kultivasi dan formasi klan Lan.",
+        bio: "Kultivator dari Gusu Lan yang tenang, disiplin, dan teguh memegang prinsip. Di balik sikapnya yang dingin, ia memiliki kepedulian yang mendalam.",
+        quote: "Benar tetaplah benar, meski tidak banyak yang memahaminya.",
+        image: "https://picsum.photos/seed/lan-wangji-verse/700/900"
+      },
+      {
+        name: "Fan Xian", fullName: "Fan Xian",
+        series: "Joy of Life (Qing Yu Nian)", age: "Sekitar 20-an tahun",
+        power: "Kecerdasan strategi, kemampuan bela diri, pengetahuan modern, dan teknik Zhen Qi.",
+        bio: "Pemuda cerdas yang hidup di dunia kerajaan penuh intrik politik. Fan Xian mengandalkan kecerdikan, keberanian, dan prinsip pribadinya untuk menghadapi berbagai konflik.",
+        quote: "Nasib bukan alasan untuk berhenti menentukan pilihan.",
+        image: "https://picsum.photos/seed/fan-xian-verse/700/900"
+      }
+    ];
+
+    const grid = document.getElementById("characterGrid");
+    const modal = document.getElementById("bioModal");
+
+    // Membuat kartu dari data karakter.
+    function renderCharacters(list) {
+      grid.innerHTML = "";
+      if (!list.length) {
+        grid.innerHTML = '<p class="empty">Karakter tidak ditemukan. Coba kata kunci lain.</p>';
+        return;
+      }
+      list.forEach((character) => {
+        const card = document.createElement("article");
+        card.className = "character-card";
+        card.innerHTML = `
+          <img class="portrait" src="${character.image}" alt="Placeholder gambar ${character.name}" loading="lazy">
+          <div class="card-content">
+            <h2>${character.name}</h2>
+            <p class="origin">${character.series}</p>
+            <button class="btn" type="button">Lihat Biografi</button>
+          </div>`;
+        card.querySelector("button").addEventListener("click", () => openBiography(character));
+        grid.appendChild(card);
+      });
+    }
+
+    // Mengisi dan menampilkan popup biografi.
+    function openBiography(character) {
+      document.getElementById("modalPhoto").src = character.image;
+      document.getElementById("modalPhoto").alt = `Placeholder gambar ${character.name}`;
+      document.getElementById("modalName").textContent = character.fullName;
+      document.getElementById("modalSeries").textContent = character.series;
+      document.getElementById("modalAge").textContent = character.age;
+      document.getElementById("modalPower").textContent = character.power;
+      document.getElementById("modalBio").textContent = character.bio;
+      document.getElementById("modalQuote").textContent = `“${character.quote}”`;
+      modal.classList.add("show");
+      document.body.style.overflow = "hidden";
+      document.getElementById("closeModal").focus();
+    }
+
+    function closeBiography() {
+      modal.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    document.getElementById("closeModal").addEventListener("click", closeBiography);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeBiography();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.classList.contains("show")) closeBiography();
+    });
+
+    // Pencarian berdasarkan nama karakter atau judul serial.
+    document.getElementById("searchInput").addEventListener("input", (event) => {
+      const keyword = event.target.value.toLowerCase().trim();
+      const filtered = characters.filter((character) =>
+        character.name.toLowerCase().includes(keyword) ||
+        character.series.toLowerCase().includes(keyword)
+      );
+      renderCharacters(filtered);
+    });
+
+    renderCharacters(characters);
+  </script>
+</body>
+</html>
